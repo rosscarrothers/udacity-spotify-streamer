@@ -1,13 +1,12 @@
 package ca.pintsofwine.spotifystreamer;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -22,11 +21,16 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TopTracksActivityFragment extends Fragment implements TrackResultHandler {
 
-    private static final String LOG_TAG = TopTracksActivityFragment.class.getSimpleName();
-
-    private ArrayAdapter<String> tracksAdapter;
+    private TrackAdapter tracksAdapter;
+    private List<Track> currentTracks;
 
     public TopTracksActivityFragment() { }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        currentTracks = new ArrayList<Track>();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,11 +39,10 @@ public class TopTracksActivityFragment extends Fragment implements TrackResultHa
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
 
         //Create adapter here
-        tracksAdapter = new ArrayAdapter<String>(
+        tracksAdapter = new TrackAdapter(
                 getActivity(),
                 R.layout.list_item_track,
-                R.id.list_item_track_name,
-                new ArrayList<String>()
+                currentTracks
         );
 
         //Bind the listview and adapter
@@ -53,7 +56,23 @@ public class TopTracksActivityFragment extends Fragment implements TrackResultHa
             new FetchTopTracksTask(this).execute(artistId);
         }
 
+        //We also expect to get the artist's name through the intent, check for it and use it to
+        //populate the action bar's subtitle
+        String artistName = getActivity().getIntent().getStringExtra(Intent.EXTRA_TITLE);
+        if (artistName != null) {
+            getActivity().getActionBar().setSubtitle(artistName);
+        }
+
         return rootView;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (tracksAdapter.isEmpty() && !currentTracks.isEmpty()) {
+            tracksAdapter.addAll(currentTracks);
+        }
     }
 
     @Override
@@ -66,9 +85,6 @@ public class TopTracksActivityFragment extends Fragment implements TrackResultHa
 
         //Simple code for now that adds the artist's name to the list
         tracksAdapter.clear();
-        for (Track track : results) {
-            tracksAdapter.add(track.name);
-            Log.v(LOG_TAG, track.name);
-        }
+        tracksAdapter.addAll(results);
     }
 }

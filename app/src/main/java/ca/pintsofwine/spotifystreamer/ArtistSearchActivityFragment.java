@@ -1,6 +1,7 @@
 package ca.pintsofwine.spotifystreamer;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,22 +18,23 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Image;
 
-
-/**
- * A placeholder fragment containing a simple view.
- */
 public class ArtistSearchActivityFragment extends Fragment implements ArtistResultHandler {
 
     private static final String LOG_TAG = ArtistSearchActivity.class.getSimpleName();
 
-    private ArrayAdapter<String> artistAdapter;
+    private ArtistAdapter artistAdapter;
+    private List<Artist> currentArtists;
 
     public ArtistSearchActivityFragment() { }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        currentArtists = new ArrayList<Artist>();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,11 +43,10 @@ public class ArtistSearchActivityFragment extends Fragment implements ArtistResu
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         //Create our adapter for populating the ListView
-        artistAdapter = new ArrayAdapter<String>(
+        artistAdapter = new ArtistAdapter(
                 getActivity(),
                 R.layout.list_item_artist,
-                R.id.list_item_artist_name_textview,
-                new ArrayList<String>()
+                currentArtists
         );
 
         //Now bind it the the list view
@@ -58,9 +58,10 @@ public class ArtistSearchActivityFragment extends Fragment implements ArtistResu
         artistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String artistName = artistAdapter.getItem(position);
+                Artist artist = artistAdapter.getItem(position);
                 Intent artistTopTracksIntent = new Intent(getActivity(), TopTracksActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, artistName);
+                        .putExtra(Intent.EXTRA_TEXT, artist.id)
+                        .putExtra(Intent.EXTRA_TITLE, artist.name);
                 startActivity(artistTopTracksIntent);
             }
         });
@@ -85,6 +86,16 @@ public class ArtistSearchActivityFragment extends Fragment implements ArtistResu
         return rootView;
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        //Re-populate the adapter when the screen orientation changes
+        if (artistAdapter.isEmpty() && !currentArtists.isEmpty()) {
+            artistAdapter.addAll(currentArtists);
+        }
+    }
+
     private void populateListForArtist(String artistName) {
         Log.v(LOG_TAG, "Searching for artist " + artistName);
         FetchArtistsTask task = new FetchArtistsTask(this);
@@ -100,25 +111,7 @@ public class ArtistSearchActivityFragment extends Fragment implements ArtistResu
             return;
         }
 
-        //Simple code for now that adds the artist's name to the list
         artistAdapter.clear();
-        for (Artist artist : results) {
-            artistAdapter.add(artist.id);
-
-            String imageUrl = getImageUrl(artist.images);
-            Log.v(LOG_TAG, artist.name + " --> " + imageUrl);
-        }
-    }
-
-    /**
-     * Helper method that simply loops through a list of images and returns the URL of the 200x200
-     * image which we want to use in our ListView
-     * @param images
-     * @return
-     */
-    private String getImageUrl(List<Image> images) {
-        TreeSet<Image> sortedSet = new TreeSet<Image>(new ImageComparator());
-        sortedSet.addAll(images);
-        return sortedSet.isEmpty() ? null : sortedSet.first().url;
+        artistAdapter.addAll(results);
     }
 }

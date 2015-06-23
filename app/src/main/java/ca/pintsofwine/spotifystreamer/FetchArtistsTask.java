@@ -14,12 +14,11 @@ public class FetchArtistsTask extends AsyncTask<String, Void, List<Artist>> {
 
     private static final String LOG_TAG = FetchArtistsTask.class.getSimpleName();
 
-    private final ArtistResultHandler delegate;
+    private final ArtistResultHandler handler;
 
     public FetchArtistsTask(ArtistResultHandler delegate) {
-        this.delegate = delegate;
+        this.handler = delegate;
     }
-
 
     @Override
     protected List<Artist> doInBackground(String... params) {
@@ -35,6 +34,6 @@ public class FetchArtistsTask extends AsyncTask<String, Void, List<Artist>> {
 
     @Override
     protected void onPostExecute(List<Artist> artists) {
-        delegate.handleResults(artists);
+        handler.handleResults(artists);
     }
 }
