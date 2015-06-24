@@ -1,4 +1,4 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.workers;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.pintsofwine.spotifystreamer.activities.TrackResultHandler;
+import ca.pintsofwine.spotifystreamer.utils.Spotify;
+import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.RetrofitError;
 
 /**
  * Created by ross on 6/15/15.
@@ -36,7 +41,17 @@ public class FetchTopTracksTask extends AsyncTask<String, Void, List<Track>> {
             return null;
         }
 
-        return Spotify.getInstance().getArtistTopTrack(params[0], queryMap).tracks;
+        SpotifyService spotify = Spotify.getInstance();
+        List<Track> trackList = null;
+
+        try {
+            Tracks spotifyResult = spotify.getArtistTopTrack(params[0], queryMap);
+            trackList = spotifyResult.tracks;
+        } catch (RetrofitError e) {
+            Log.e(LOG_TAG, "Error retrieving top tracks for " + params[0], e);
+        }
+
+        return trackList;
     }
 
     @Override

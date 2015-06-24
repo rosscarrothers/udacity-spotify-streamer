@@ -1,4 +1,4 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.fragments;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -13,6 +13,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.pintsofwine.spotifystreamer.workers.FetchTopTracksTask;
+import ca.pintsofwine.spotifystreamer.utils.NetworkUtils;
+import ca.pintsofwine.spotifystreamer.R;
+import ca.pintsofwine.spotifystreamer.adapters.TrackAdapter;
+import ca.pintsofwine.spotifystreamer.activities.TrackResultHandler;
 import kaaes.spotify.webapi.android.models.Track;
 
 
@@ -53,7 +58,7 @@ public class TopTracksActivityFragment extends Fragment implements TrackResultHa
         //Grab the name of the artist and populate the list with their top tracks
         String artistId = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
         if (artistId != null) {
-            new FetchTopTracksTask(this).execute(artistId);
+            populateTopTracksList(artistId);
         }
 
         //We also expect to get the artist's name through the intent, check for it and use it to
@@ -64,6 +69,19 @@ public class TopTracksActivityFragment extends Fragment implements TrackResultHa
         }
 
         return rootView;
+    }
+
+    private void populateTopTracksList(String artistId) {
+        //Display an error and return if there's no network connection
+        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+            Toast.makeText(getActivity(),
+                    "Unable to search for artist's top tracks - no network connection available",
+                    Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
+        new FetchTopTracksTask(this).execute(artistId);
     }
 
     @Override
@@ -80,6 +98,7 @@ public class TopTracksActivityFragment extends Fragment implements TrackResultHa
         //Handle the case where we didn't get any results
         if (results == null || results.isEmpty()) {
             Toast.makeText(getActivity(), "No results found", Toast.LENGTH_SHORT).show();
+            tracksAdapter.clear();
             return;
         }
 

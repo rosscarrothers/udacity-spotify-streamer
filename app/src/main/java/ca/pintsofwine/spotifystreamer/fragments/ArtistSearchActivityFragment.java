@@ -1,10 +1,9 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.fragments;
 
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +18,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.pintsofwine.spotifystreamer.adapters.ArtistAdapter;
+import ca.pintsofwine.spotifystreamer.activities.ArtistResultHandler;
+import ca.pintsofwine.spotifystreamer.workers.FetchArtistsTask;
+import ca.pintsofwine.spotifystreamer.utils.NetworkUtils;
+import ca.pintsofwine.spotifystreamer.R;
+import ca.pintsofwine.spotifystreamer.activities.TopTracksActivity;
 import kaaes.spotify.webapi.android.models.Artist;
 
 public class ArtistSearchActivityFragment extends Fragment implements ArtistResultHandler {
-
-    private static final String LOG_TAG = ArtistSearchActivity.class.getSimpleName();
 
     private ArtistAdapter artistAdapter;
     private List<Artist> currentArtists;
@@ -97,9 +100,17 @@ public class ArtistSearchActivityFragment extends Fragment implements ArtistResu
     }
 
     private void populateListForArtist(String artistName) {
-        Log.v(LOG_TAG, "Searching for artist " + artistName);
-        FetchArtistsTask task = new FetchArtistsTask(this);
-        task.execute(artistName);
+
+        //Display an error and return if there's no network connection
+        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+            Toast.makeText(getActivity(),
+                    "Unable to search for artist - no network connection available",
+                    Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
+        new FetchArtistsTask(this).execute(artistName);
     }
 
     @Override
@@ -108,6 +119,7 @@ public class ArtistSearchActivityFragment extends Fragment implements ArtistResu
         //Handle the case where we didn't get any results
         if (results == null || results.isEmpty()) {
             Toast.makeText(getActivity(), "No results found", Toast.LENGTH_SHORT).show();
+            artistAdapter.clear();
             return;
         }
 

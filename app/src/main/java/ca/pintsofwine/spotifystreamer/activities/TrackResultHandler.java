@@ -1,4 +1,4 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.activities;
 
 import java.util.List;
 

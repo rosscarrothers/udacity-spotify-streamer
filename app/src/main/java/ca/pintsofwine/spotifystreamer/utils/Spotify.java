@@ -1,4 +1,4 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.utils;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;

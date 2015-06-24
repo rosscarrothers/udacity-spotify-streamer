@@ -1,9 +1,11 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.activities;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import ca.pintsofwine.spotifystreamer.R;
 
 
 public class ArtistSearchActivity extends FragmentActivity {

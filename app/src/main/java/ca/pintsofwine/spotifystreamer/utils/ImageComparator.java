@@ -1,4 +1,4 @@
-package ca.pintsofwine.spotifystreamer;
+package ca.pintsofwine.spotifystreamer.utils;
 
 import java.util.Comparator;
 

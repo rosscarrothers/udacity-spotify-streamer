@@ -3,6 +3,8 @@
     package="ca.pintsofwine.spotifystreamer" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -10,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".ArtistSearchActivity"
+            android:name=".activities.ArtistSearchActivity"
             android:label="@string/app_name"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop">
@@ -21,13 +23,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TopTracksActivity"
+            android:name=".activities.TopTracksActivity"
             android:label="@string/title_activity_top_tracks"
-            android:parentActivityName=".ArtistSearchActivity"
+            android:parentActivityName=".activities.ArtistSearchActivity"
             android:configChanges="orientation|screenSize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ca.pintsofwine.spotifystreamer.ArtistSearchActivity" />
+                android:value=".activities.ArtistSearchActivity" />
         </activity>
     </application>
 
